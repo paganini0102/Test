@@ -30,8 +30,7 @@ abstract public class MosaicTools {
         pos1.setY2(2132);
 
         MosaicTools.mosaic(pic1, pos1);
-        
-        
+
         Pic pic2 = new Pic();
         pic2.setSourceFile(classPath + "企业借款及居间协议_1.png");
         pic2.setToSaveDir(classPath + "tmp/");
@@ -60,7 +59,8 @@ abstract public class MosaicTools {
         }
         int size = 1;
         BufferedImage bi = ImageIO.read(file); // 读取该图片
-        BufferedImage spinImage = new BufferedImage(bi.getWidth(), bi.getHeight(), bi.TYPE_INT_RGB);
+        BufferedImage spinImage = new BufferedImage(bi.getWidth(), bi.getHeight(),
+            BufferedImage.TYPE_INT_RGB);
         if (bi.getWidth() < size || bi.getHeight() < size || size <= 0) { // 马赛克格尺寸太大或太小
             return false;
         }
@@ -106,8 +106,9 @@ abstract public class MosaicTools {
                     centerY += (mheight - 1) / 2;
                 }
                 if (x > pos.x1 && x < pos.x2 && y > pos.y1 && y < pos.y2) {
-                    gs.setColor(new Color(bi.getRGB(centerX - new Random(0).nextInt(30),
-                        centerY - new Random().nextInt(30))));
+                    Random random = new Random(0);
+                    gs.setColor(new Color(
+                        bi.getRGB(centerX - random.nextInt(30), centerY - random.nextInt(30))));
                 } else {
                     gs.setColor(new Color(bi.getRGB(centerX, centerY)));
                 }
