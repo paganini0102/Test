@@ -16,19 +16,35 @@ import javax.imageio.ImageIO;
 abstract public class MosaicTools {
 
     public static void main(String[] args) throws Exception {
+        String classPath = MosaicTools.class.getResource("/").getFile().substring(1);
         Pic pic1 = new Pic();
-        pic1.setSourceFile("E:/pdftest/企业借款及居间协议/企业借款及居间协议_1.png");
-        pic1.setToSaveDir("E:/pdftest/企业借款及居间协议/");
-        pic1.setToSaveName("test");
+        pic1.setSourceFile(classPath + "企业借款及居间协议_9.png");
+        pic1.setToSaveDir(classPath + "tmp/");
+        pic1.setToSaveName("test1");
         pic1.setSuffix("png");
 
-        Position pos = new Position();
-        pos.setX1(597);
-        pos.setX2(996);
-        pos.setY1(1958);
-        pos.setY2(2132);
+        Position pos1 = new Position();
+        pos1.setX1(597);
+        pos1.setX2(996);
+        pos1.setY1(1958);
+        pos1.setY2(2132);
 
-        MosaicTools.mosaic(pic1, pos);
+        MosaicTools.mosaic(pic1, pos1);
+        
+        
+        Pic pic2 = new Pic();
+        pic2.setSourceFile(classPath + "企业借款及居间协议_1.png");
+        pic2.setToSaveDir(classPath + "tmp/");
+        pic2.setToSaveName("test2");
+        pic2.setSuffix("png");
+
+        Position pos2 = new Position();
+        pos2.setX1(492);
+        pos2.setX2(2088);
+        pos2.setY1(1100);
+        pos2.setY2(1420);
+
+        MosaicTools.mosaic(pic2, pos2);
     }
 
     /**
@@ -42,29 +58,34 @@ abstract public class MosaicTools {
         if (!file.isFile()) {
             throw new Exception("ImageDeal>>>" + file + " 不是一个图片文件!");
         }
+        int size = 1;
         BufferedImage bi = ImageIO.read(file); // 读取该图片
-        BufferedImage spinImage = new BufferedImage(bi.getWidth(), bi.getHeight(),
-            BufferedImage.TYPE_INT_RGB);
+        BufferedImage spinImage = new BufferedImage(bi.getWidth(), bi.getHeight(), bi.TYPE_INT_RGB);
+        if (bi.getWidth() < size || bi.getHeight() < size || size <= 0) { // 马赛克格尺寸太大或太小
+            return false;
+        }
 
         int xcount = 0; // x方向绘制个数
         int ycount = 0; // y方向绘制个数
-        if (bi.getWidth() == 0) {
-            xcount = bi.getWidth() / 1;
+        if (bi.getWidth() % size == 0) {
+            xcount = bi.getWidth() / size;
         } else {
-            xcount = bi.getWidth() / 2;
+            xcount = bi.getWidth() / size + 1;
         }
-        if (bi.getHeight() == 0) {
-            ycount = bi.getHeight() / 1;
+        if (bi.getHeight() % size == 0) {
+            ycount = bi.getHeight() / size;
         } else {
-            ycount = bi.getHeight() / 2;
+            ycount = bi.getHeight() / size + 1;
         }
-        int x = 0, y = 0; //坐标
+        int x = 0; //坐标
+        int y = 0;
         // 绘制马赛克(绘制矩形并填充颜色)
         Graphics gs = spinImage.getGraphics();
         for (int i = 0; i < xcount; i++) {
             for (int j = 0; j < ycount; j++) {
                 // 马赛克矩形格大小
-                int mwidth = 1, mheight = 1;
+                int mwidth = size;
+                int mheight = size;
                 if (i == xcount - 1) { //横向最后一个比較特殊，可能不够一个size
                     mwidth = bi.getWidth() - x;
                 }
@@ -72,7 +93,8 @@ abstract public class MosaicTools {
                     mheight = bi.getHeight() - y;
                 }
                 // 矩形颜色取中心像素点RGB值
-                int centerX = x, centerY = y;
+                int centerX = x;
+                int centerY = y;
                 if (mwidth % 2 == 0) {
                     centerX += mwidth / 2;
                 } else {
@@ -84,17 +106,18 @@ abstract public class MosaicTools {
                     centerY += (mheight - 1) / 2;
                 }
                 if (x > pos.x1 && x < pos.x2 && y > pos.y1 && y < pos.y2) {
-                    gs.setColor(new Color(bi.getRGB(centerX - new Random().nextInt(30),
+                    gs.setColor(new Color(bi.getRGB(centerX - new Random(0).nextInt(30),
                         centerY - new Random().nextInt(30))));
                 } else {
                     gs.setColor(new Color(bi.getRGB(centerX, centerY)));
                 }
                 gs.fillRect(x, y, mwidth, mheight);
-                y = y + 1;// 计算下一个矩形的y坐标
+                y = y + size;// 计算下一个矩形的y坐标
             }
             y = 0;// 还原y坐标
-            x = x + 1;// 计算x坐标
+            x = x + size;// 计算x坐标
         }
+        gs.dispose();
         gs.dispose();
         File sf = new File(pic.toSaveDir, pic.toSaveName + "." + pic.suffix);
         ImageIO.write(spinImage, pic.suffix, sf); // 保存图片
